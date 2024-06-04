@@ -18,7 +18,7 @@ namespace codecrafters_http_server
                 server.Start();
 
                 string httpResponse = string.Empty;
-                byte[] data = new byte[(int)DataSize.Kilobyte];
+                byte[] data = new byte[(int)DataSizeEnum.Kilobyte];
                 string okMessage = $"HTTP/1.1 {(int)HTTPStatusCodesEnum.Ok} OK\r\n";
                 string notFoundMessage = $"HTTP/1.1 {(int)HTTPStatusCodesEnum.NotFound} Not Found\r\n\r\n";
 
