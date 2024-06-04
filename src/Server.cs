@@ -6,7 +6,7 @@ using System.Text;
 
 namespace codecrafters_http_server
 {
-    public class Program
+    public class Server
     {
         public static void Main()
         {
