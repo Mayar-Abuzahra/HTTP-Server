@@ -6,7 +6,7 @@
         NotFound = 404
     }
 
-    enum DataSize
+    enum DataSizeEnum
     {
         Kilobyte = 1024
     }
