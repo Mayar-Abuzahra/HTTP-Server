@@ -21,6 +21,7 @@ namespace codecrafters_http_server
                 byte[] data = new byte[(int)DataSizeEnum.Kilobyte];
                 string okMessage = $"HTTP/1.1 {(int)HTTPStatusCodesEnum.Ok} OK\r\n";
                 string notFoundMessage = $"HTTP/1.1 {(int)HTTPStatusCodesEnum.NotFound} Not Found\r\n\r\n";
+                string createdMessage = $"HTTP/1.1 {(int)HTTPStatusCodesEnum.Created} Created\r\n\r\n";
 
                 while (true)
                 {
@@ -43,15 +44,25 @@ namespace codecrafters_http_server
                         // ./server.sh --directory <directory>
                         string[] commandLineArgs = Environment.GetCommandLineArgs();
 
-                        // <directory> is the third argument
                         string dir = commandLineArgs[2];
                         string fileName = Helper.SplitString(requestParts[2], ' ')[0];
                         string filePath = $"{dir}{fileName}";
 
-                        if (File.Exists(filePath))
+                        if (requestParts[0].StartsWith("GET"))
                         {
-                            string fileContent = File.ReadAllText(filePath);
-                            httpResponse = $"{okMessage}Content-Type: application/octet-stream\r\nContent-Length: {fileContent.Length}\r\n\r\n{fileContent}";
+                            if (File.Exists(filePath))
+                            {
+                               string fileContent = File.ReadAllText(filePath);
+                               httpResponse = $"{okMessage}Content-Type: application/octet-stream\r\nContent-Length: {fileContent.Length}\r\n\r\n{fileContent}";
+                            }
+                            else
+                                httpResponse = notFoundMessage;
+                        }
+                        else if (requestParts[0].StartsWith("POST"))
+                        {
+                            string fileContent = requestLines[requestLines.Length - 1];
+                            File.WriteAllText(filePath, fileContent);
+                            httpResponse = createdMessage;
                         }
                         else
                             httpResponse = notFoundMessage;
