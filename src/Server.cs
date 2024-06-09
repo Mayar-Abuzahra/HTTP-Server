@@ -36,7 +36,17 @@ namespace codecrafters_http_server
                     if (requestParts.Length > 1 && requestParts[1] == " HTTP")
                         httpResponse = $"{okMessage}\r\n";
                     else if (requestParts[1].StartsWith("echo"))
-                        httpResponse = $"{okMessage}Content-Type: text/plain\r\nContent-Length: {Helper.SplitString(requestParts[2], ' ')[0].Length}\r\n\r\n{Helper.SplitString(requestParts[2], ' ')[0]}";
+                    {
+                        string encodingHeader = (!string.IsNullOrEmpty(requestLines[2])) ? requestLines[2].Split(':')[1].Trim() : "";
+                        encodingHeader = (encodingHeader != "invalid-encoding") ? encodingHeader : "";
+
+                        if (!string.IsNullOrEmpty(encodingHeader))
+                        {
+                            httpResponse = $"{okMessage}Content-Encoding: {encodingHeader}\r\nContent-Type: text/plain\r\nContent-Length: {Helper.SplitString(requestParts[2], ' ')[0].Length}\r\n\r\n{Helper.SplitString(requestParts[2], ' ')[0]}";
+                        }
+                        else
+                            httpResponse = $"{okMessage}Content-Type: text/plain\r\nContent-Length: {Helper.SplitString(requestParts[2], ' ')[0].Length}\r\n\r\n{Helper.SplitString(requestParts[2], ' ')[0]}";
+                    }
                     else if (requestParts[1].StartsWith("user-agent"))
                         httpResponse = $"{okMessage}Content-Type: text/plain\r\nContent-Length: {Helper.SplitString(requestLines[2], ' ')[1].Length} \r\n\r\n{Helper.SplitString(requestLines[2], ' ')[1]}\r\n";
                     else if (requestParts[1].StartsWith("files"))
@@ -52,8 +62,8 @@ namespace codecrafters_http_server
                         {
                             if (File.Exists(filePath))
                             {
-                               string fileContent = File.ReadAllText(filePath);
-                               httpResponse = $"{okMessage}Content-Type: application/octet-stream\r\nContent-Length: {fileContent.Length}\r\n\r\n{fileContent}";
+                                string fileContent = File.ReadAllText(filePath);
+                                httpResponse = $"{okMessage}Content-Type: application/octet-stream\r\nContent-Length: {fileContent.Length}\r\n\r\n{fileContent}";
                             }
                             else
                                 httpResponse = notFoundMessage;
