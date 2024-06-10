@@ -54,9 +54,10 @@ namespace codecrafters_http_server
 
                             byte[] compressedData = compressedStream.ToArray();
                             httpResponse = $"HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: {compressedData.Length}\r\n\r\n";
-                            socket.Send([.. Encoding.UTF8.GetBytes(httpResponse), .. compressedData]);
 
+                            socket.Send([.. Encoding.UTF8.GetBytes(httpResponse), .. compressedData]);
                             socket.Close();
+
                             break;
                         }
                         else
