@@ -37,13 +37,11 @@ namespace codecrafters_http_server
                         httpResponse = $"{okMessage}\r\n";
                     else if (requestParts[1].StartsWith("echo"))
                     {
-                        string encodingHeader = (!string.IsNullOrEmpty(requestLines[2])) ? requestLines[2].Split(':')[1].Trim() : "";
-                        encodingHeader = (encodingHeader != "invalid-encoding") ? encodingHeader : "";
+                        string[] encodingHeader = (!string.IsNullOrEmpty(requestLines[2])) ? Helper.SplitString(Helper.SplitString(requestLines[2], ':')[1].Trim(), ',') : [];
+                        bool containsGzip = encodingHeader.Any(header => string.Equals(header.Trim(), "gzip", StringComparison.OrdinalIgnoreCase));
 
-                        if (!string.IsNullOrEmpty(encodingHeader))
-                        {
-                            httpResponse = $"{okMessage}Content-Encoding: {encodingHeader}\r\nContent-Type: text/plain\r\nContent-Length: {Helper.SplitString(requestParts[2], ' ')[0].Length}\r\n\r\n{Helper.SplitString(requestParts[2], ' ')[0]}";
-                        }
+                        if (containsGzip)
+                            httpResponse = $"{okMessage}Content-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: {Helper.SplitString(requestParts[2], ' ')[0].Length}\r\n\r\n{Helper.SplitString(requestParts[2], ' ')[0]}";
                         else
                             httpResponse = $"{okMessage}Content-Type: text/plain\r\nContent-Length: {Helper.SplitString(requestParts[2], ' ')[0].Length}\r\n\r\n{Helper.SplitString(requestParts[2], ' ')[0]}";
                     }
