@@ -1,5 +1,6 @@
 using codecrafters_http_server.src.Enums;
 using codecrafters_http_server.src.Helper;
+using System.IO.Compression;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -41,7 +42,21 @@ namespace codecrafters_http_server
                         bool containsGzip = encodingHeader.Any(header => string.Equals(header.Trim(), "gzip", StringComparison.OrdinalIgnoreCase));
 
                         if (containsGzip)
-                            httpResponse = $"{okMessage}Content-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: {Helper.SplitString(requestParts[2], ' ')[0].Length}\r\n\r\n{Helper.SplitString(requestParts[2], ' ')[0]}";
+                        {
+                            byte[] uncompressedData = Encoding.UTF8.GetBytes(Helper.SplitString(requestParts[2], ' ')[0]);
+
+                            using MemoryStream compressedStream = new MemoryStream();
+                            using GZipStream gzipStream = new GZipStream(compressedStream, CompressionMode.Compress, true);
+                            
+                            gzipStream.Write(uncompressedData, 0, uncompressedData.Length);
+                            gzipStream.Flush();
+                            gzipStream.Close();
+
+                            byte[] compressedData = compressedStream.ToArray();
+                            string compressedString = Convert.ToBase64String(compressedData);
+                            httpResponse = $"HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: {compressedData.Length}\r\n\r\n";
+                            socket.Send([.. Encoding.UTF8.GetBytes(httpResponse), .. compressedData]);
+                        }
                         else
                             httpResponse = $"{okMessage}Content-Type: text/plain\r\nContent-Length: {Helper.SplitString(requestParts[2], ' ')[0].Length}\r\n\r\n{Helper.SplitString(requestParts[2], ' ')[0]}";
                     }
