@@ -56,6 +56,9 @@ namespace codecrafters_http_server
                             string compressedString = Convert.ToBase64String(compressedData);
                             httpResponse = $"HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: {compressedData.Length}\r\n\r\n";
                             socket.Send([.. Encoding.UTF8.GetBytes(httpResponse), .. compressedData]);
+
+                            socket.Close();
+                            break;
                         }
                         else
                             httpResponse = $"{okMessage}Content-Type: text/plain\r\nContent-Length: {Helper.SplitString(requestParts[2], ' ')[0].Length}\r\n\r\n{Helper.SplitString(requestParts[2], ' ')[0]}";
