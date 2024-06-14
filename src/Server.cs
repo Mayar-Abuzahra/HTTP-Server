@@ -62,7 +62,7 @@ public class Server
                     }
                     else
                         httpResponse = $"{okMessage}Content-Type: text/plain\r\nContent-Length: {Helper.SplitString(requestParts[2], ' ')[0].Length}\r\n\r\n{Helper.SplitString(requestParts[2], ' ')[0]}";
-                    }
+                }
                 else if (requestParts[1].StartsWith("user-agent"))
                     httpResponse = $"{okMessage}Content-Type: text/plain\r\nContent-Length: {Helper.SplitString(requestLines[2], ' ')[1].Length} \r\n\r\n{Helper.SplitString(requestLines[2], ' ')[1]}\r\n";
                 else if (requestParts[1].StartsWith("files"))
