@@ -83,15 +83,15 @@ public class Server
                         }
                         else
                             httpResponse = notFoundMessage;
-                        }
+                    }
                     else if (requestParts[0].StartsWith("POST"))
                     {
                         string fileContent = requestLines[requestLines.Length - 1];
                         File.WriteAllText(filePath, fileContent);
                         httpResponse = createdMessage;
                     }
-                else
-                    httpResponse = notFoundMessage;
+                    else
+                        httpResponse = notFoundMessage;
                 }
                 else
                 {
