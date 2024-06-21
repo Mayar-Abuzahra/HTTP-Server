@@ -19,10 +19,11 @@ public class Server
             server.Start();
 
             string httpResponse = string.Empty;
+            string httpVersion = "HTTP/1.1";
             byte[] data = new byte[(int)DataSizeEnum.Kilobyte];
-            string okMessage = $"HTTP/1.1 {(int)HTTPStatusCode.OK} OK\r\n";
-            string notFoundMessage = $"HTTP/1.1 {(int)HTTPStatusCode.NotFound} Not Found\r\n\r\n";
-            string createdMessage = $"HTTP/1.1 {(int)HTTPStatusCode.Created} Created\r\n\r\n";
+            string okMessage = $"{httpVersion} {(int)HTTPStatusCode.OK} {nameof(HTTPStatusCode.OK)}\r\n";
+            string notFoundMessage = $"{httpVersion} {(int)HTTPStatusCode.NotFound} Not Found\r\n\r\n";
+            string createdMessage = $"{httpVersion} {(int)HTTPStatusCode.Created} {nameof(HTTPStatusCode.Created)}\r\n\r\n";
 
             while (true)
             {
@@ -55,7 +56,7 @@ public class Server
                         gzipStream.Close();
 
                         byte[] compressedData = compressedStream.ToArray();
-                        httpResponse = $"HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: {compressedData.Length}\r\n\r\n";
+                        httpResponse = $"{httpVersion} 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: {compressedData.Length}\r\n\r\n";
 
                         socket.Send([..Encoding.UTF8.GetBytes(httpResponse), ..compressedData]);
                         socket.Close();
