@@ -1,14 +1,6 @@
-namespace codecrafters_http_server.src.Enums
-{
-    enum HTTPStatusCodesEnum
-    {
-        Ok = 200,
-        Created = 201,
-        NotFound = 404
-    }
+namespace codecrafters_http_server.src.Enums;
 
-    enum DataSizeEnum
-    {
-        Kilobyte = 1024
-    }
+enum DataSizeEnum
+{
+    Kilobyte = 1024
 }

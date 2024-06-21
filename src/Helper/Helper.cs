@@ -10,7 +10,9 @@
         /// </summary>
         public static string[] SplitString(string str, char symbol)
         {
-            return str.Trim().Split(symbol);
+            string trimStr = str.Trim();
+
+            return trimStr.Split(symbol);
         }
     }
 }
