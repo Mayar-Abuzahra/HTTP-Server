@@ -20,10 +20,11 @@ public class Server
 
             string httpResponse = string.Empty;
             string httpVersion = "HTTP/1.1";
-            byte[] data = new byte[(int)DataSizeEnum.Kilobyte];
-            string okMessage = $"{httpVersion} {(int)HTTPStatusCode.OK} {nameof(HTTPStatusCode.OK)}\r\n";
-            string notFoundMessage = $"{httpVersion} {(int)HTTPStatusCode.NotFound} Not Found\r\n\r\n";
-            string createdMessage = $"{httpVersion} {(int)HTTPStatusCode.Created} {nameof(HTTPStatusCode.Created)}\r\n\r\n";
+            string crlf = "\r\n";
+            byte[] data = new byte[(int)DataSize.Kilobyte];
+            string okMessage = $"{httpVersion} {(int)HTTPStatusCode.OK} {nameof(HTTPStatusCode.OK)}{crlf}";
+            string notFoundMessage = $"{httpVersion} {(int)HTTPStatusCode.NotFound} Not Found{crlf}{crlf}";
+            string createdMessage = $"{httpVersion} {(int)HTTPStatusCode.Created} {nameof(HTTPStatusCode.Created)}{crlf}{crlf}";
 
             while (true)
             {
@@ -32,14 +33,14 @@ public class Server
                 int dataSize = socket.Receive(data);
                 string requestData = Encoding.UTF8.GetString(data, 0, dataSize);
 
-                var requestLines = requestData.Split("\r\n");
+                var requestLines = requestData.Split(crlf);
                 var requestParts = Helper.SplitString(requestLines[0], '/');
 
                 if (requestParts.Length > 1 && requestParts[1] == " HTTP")
                 {
-                    httpResponse = $"{okMessage}\r\n";
+                    httpResponse = $"{okMessage}{crlf}";
                 }
-                else if (requestParts[1].StartsWith("echo"))
+                else if (requestParts[1].StartsWith(nameof(HTTPFunction.echo)))
                 {
                     string[] encodingHeader = (!string.IsNullOrEmpty(requestLines[2])) ? Helper.SplitString(Helper.SplitString(requestLines[2], ':')[1].Trim(), ',') : [];
                     bool containsGzip = encodingHeader.Any(header => string.Equals(header.Trim(), "gzip", StringComparison.OrdinalIgnoreCase));
@@ -56,7 +57,7 @@ public class Server
                         gzipStream.Close();
 
                         byte[] compressedData = compressedStream.ToArray();
-                        httpResponse = $"{httpVersion} 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: {compressedData.Length}\r\n\r\n";
+                        httpResponse = $"{httpVersion} {(int)HTTPStatusCode.OK} {nameof(HTTPStatusCode.OK)}{crlf}Content-Encoding: gzip{crlf}Content-Type: text/plain{crlf}Content-Length: {compressedData.Length}{crlf}{crlf}";
 
                         socket.Send([..Encoding.UTF8.GetBytes(httpResponse), ..compressedData]);
                         socket.Close();
@@ -65,14 +66,14 @@ public class Server
                     }
                     else
                     {
-                        httpResponse = $"{okMessage}Content-Type: text/plain\r\nContent-Length: {Helper.SplitString(requestParts[2], ' ')[0].Length}\r\n\r\n{Helper.SplitString(requestParts[2], ' ')[0]}";
+                        httpResponse = $"{okMessage}Content-Type: text/plain{crlf}Content-Length: {Helper.SplitString(requestParts[2], ' ')[0].Length}{crlf}{crlf}{Helper.SplitString(requestParts[2], ' ')[0]}";
                     }
                 }
-                else if (requestParts[1].StartsWith("user-agent"))
+                else if (requestParts[1].StartsWith(HTTPFunction.user_agent.ToString().Replace('_', '-')))
                 {
-                    httpResponse = $"{okMessage}Content-Type: text/plain\r\nContent-Length: {Helper.SplitString(requestLines[2], ' ')[1].Length} \r\n\r\n{Helper.SplitString(requestLines[2], ' ')[1]}\r\n";
+                    httpResponse = $"{okMessage}Content-Type: text/plain{crlf}Content-Length: {Helper.SplitString(requestLines[2], ' ')[1].Length} {crlf}{crlf}{Helper.SplitString(requestLines[2], ' ')[1]}{crlf}";
                 }
-                else if (requestParts[1].StartsWith("files"))
+                else if (requestParts[1].StartsWith(nameof(HTTPFunction.files)))
                 {
                     // ./server.sh --directory <directory>
                     string[] commandLineArgs = Environment.GetCommandLineArgs();
@@ -81,19 +82,19 @@ public class Server
                     string fileName = Helper.SplitString(requestParts[2], ' ')[0];
                     string filePath = $"{dir}{fileName}";
 
-                    if (requestParts[0].StartsWith("GET"))
+                    if (requestParts[0].StartsWith(nameof(HTTPMethod.GET)))
                     {
                         if (File.Exists(filePath))
                         {
                             string fileContent = File.ReadAllText(filePath);
-                            httpResponse = $"{okMessage}Content-Type: application/octet-stream\r\nContent-Length: {fileContent.Length}\r\n\r\n{fileContent}";
+                            httpResponse = $"{okMessage}Content-Type: application/octet-stream{crlf}Content-Length: {fileContent.Length}{crlf}{crlf}{fileContent}";
                         }
                         else
                         {
                             httpResponse = notFoundMessage;
                         }
                     }
-                    else if (requestParts[0].StartsWith("POST"))
+                    else if (requestParts[0].StartsWith(nameof(HTTPMethod.POST)))
                     {
                         string fileContent = requestLines[requestLines.Length - 1];
                         File.WriteAllText(filePath, fileContent);
