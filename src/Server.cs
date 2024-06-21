@@ -117,6 +117,7 @@ public class Server
         catch (Exception e)
         {
             Console.WriteLine("Error: " + e.StackTrace);
+            throw;
         }
     }
 }
